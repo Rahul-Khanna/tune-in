@@ -1,0 +1,15 @@
+To install:
+	brew install mongodb
+		if you need to reinstall it do the following:
+			1. brew uninstall --force mongodb
+			2. brew install mongodb
+
+To start:
+	brew services start mongodb
+
+To stop:
+	brew services stop mongodb
+
+To start a shell:
+	mongo
+
