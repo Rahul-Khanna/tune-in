@@ -1,0 +1,133 @@
+Tune In - Google News For Music
+
+Purpose:
+To let users know when their favorite artists come out with new songs
+
+Notes:
+User must log in through either Soundcloud or Spotify (both is okay too)
+
+Pull all songs they have liked/artists they follow/playlists they have liked, and get all artists from there
+	Note:
+		For soundcloud will have to do artists checks - otherwise invalid
+
+Allow user to control % of top artists they would like to follow (top artists - score)
+	score factors:
+		1. # of songs
+		2. # of playlists
+		3. Follow or not
+	score will get updated once a week <- to account for gradual changes in music taste
+
+Allow user to delete or add an artist at any time
+	Note:
+		keep it simple, I like the add block way
+
+Keep 1 month worth of notifications in database
+	Note:
+		one month is just a number
+
+Pages:
+1. New Notifications 
+2. Old Notifications 
+3. Settings
+4. Saved Songs
+
+New Notifications Page:
+Side bar will have notifications by artists with a number next to it indicating how many new notifications from that artists
+
+Side bar is sorted by timestamp
+
+Main part will have the selected artist’s notifications:
+List of songs and provide some sort of ability to play the song through the web app. 
+If they like the song it is added into respective Soundcloud or Spotify Library - allow reverse of this
+They can also add it to their Saved Songs page - allow reverse of this 
+
+If a user toggles between artists the unopened indication goes away, but artists remain in the sidebar till the session is closed
+
+Once session is closed all opened artist notifications get cleared and pushed into old notifications page
+
+
+Old Notifications Page:
+Similar set up to New Notifications Page, except side bar can be searched through by artist
+
+Side bar is sorted alphabetically this time
+
+
+Saved Songs Page:
+List of saved songs
+
+Sorted by time
+
+Searchable
+
+Indication if available on Soundcloud or Spotify
+
+Indication if saved already on either platform
+
+Settings:
+Change Password
+Change Username
+Add Spotify
+Add Soundcloud
+Add artists
+View following artists
+Delete artists
+Change % of top artists (default is 15%)
+Delete Account
+
+
+
+Database Side
+
+// The User Table
+User Table:
+User Id Primary Key
+Username Unique
+Password Not Null
+Soundcloud Info Unique
+Spotify Info	Unique
+% of top artists > 0
+
+// Place to keep track of artists of all Users
+Artist Table:
+Artist Id Primary Key
+Artist Name
+
+// Store all Possible Notifications
+// Do this as a batch job, where we check all artists in the database for new songs… do this about 3 times a day
+Notifications Table:
+Notification Id Primary Key
+Artist Id Unique Not Null
+Song Name Not Null
+Timestamp Not Null
+Soundcloud Info Unique
+Spotify Info Unique
+
+Possible Following Table:
+User Id 
+Artist Id
+Score
+
+Following Table:
+User Id
+Artist Id
+
+User- Notifications Table:
+User Id
+Notification Id
+Old/New Indicator
+Saved On Soundcloud indicator
+Saved On Spotify indicator
+
+Saved Song Table:
+User Id
+Song Name
+Timestamp
+Soundcloud Info
+Spotify Info
+Saved On Soundcloud indicator
+Saved On Spotify indicator
+
+
+
+
+	

@@ -1,0 +1,30 @@
+To install:
+	brew install mongodb
+		if you need to reinstall it do the following:
+			1. brew uninstall --force mongodb
+			2. brew install mongodb
+
+To start:
+	brew services start mongodb
+
+To stop:
+	brew services stop mongodb
+
+To start a shell:
+	mongo
+
+
+Useful commands:
+	to swtich to  the database:
+		use jacksLittleProject
+
+	to check databases:
+		show dbs
+
+	to create a Collection (Table):
+		db.createCollection(name,{"autoIndexId" : True})
+
+	to insert into Collection :
+		db.name.insert({JSON OBJECT})
+		you have to make sure your process are going to keep the data clean
+
