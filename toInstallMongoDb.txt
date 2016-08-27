@@ -4,6 +4,9 @@ To install:
 			1. brew uninstall --force mongodb
 			2. brew install mongodb
 
+Create the data folder:
+	mkdir -p /data/db
+	
 To start:
 	brew services start mongodb
 
