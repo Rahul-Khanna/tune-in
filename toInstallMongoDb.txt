@@ -4,6 +4,9 @@ To install:
 			1. brew uninstall --force mongodb
 			2. brew install mongodb
 
+Create the data folder:
+	mkdir -p /data/db
+	
 To start:
 	brew services start mongodb
 
@@ -28,3 +31,5 @@ Useful commands:
 		db.name.insert({JSON OBJECT})
 		you have to make sure your process are going to keep the data clean
 
+Where it's stored:
+	/usr/local/Cellar/mongodb/3.2.8
