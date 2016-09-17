@@ -6,29 +6,42 @@ var bcrypt   = require('bcrypt-nodejs');
 // define the schema for our user model
 var userSchema = mongoose.Schema({
 
-    local            : {
-        email        : String,
-        password     : String,
-    },
-    facebook         : {
-        id           : String,
-        token        : String,
-        email        : String,
-        name         : String
-    },
-    twitter          : {
-        id           : String,
-        token        : String,
-        displayName  : String,
-        username     : String
-    },
-    google           : {
-        id           : String,
-        token        : String,
-        email        : String,
-        name         : String
-    }
+    user            : {
+        id        : mongoose.Schema.Types.ObjectId,
 
+        spotifyInfo     : {
+            token       : String,
+            email       : String,
+            userName    : String,
+            active      : Boolean
+
+        },
+        soundcloudInfo  : {
+            token       : String,
+            email       : String,
+            userName    : String,
+            active      : Boolean
+        },
+
+        percOfTopArtists: { type: Number, min: 0, max: 100 },
+
+        possibleArtists : [
+            {
+                artistId    : mongoose.Schema.Types.ObjectId,
+                score       : {type: Number}
+            }
+        ],
+
+        following: [mongoose.Schema.Types.ObjectId],
+
+        newNotifications: [mongoose.Schema.Types.ObjectId],
+
+        saveSongs: [mongoose.Schema.Types.ObjectId],
+
+        timeStamp: {type: Date, default: Date.now},
+
+        lastLogin: {type: Date}
+    }
 });
 
 // methods ======================
