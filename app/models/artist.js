@@ -10,7 +10,7 @@ var artistSchema = mongoose.Schema({
 
         timeStamp : {type: Date, default: Date.now},
 
-        numberOfUsers : {type: Date, default: 0, min: 0},
+        numberOfUsers : {type: Number, default: 0, min: 0},
 
         name: String
     }

@@ -6,7 +6,7 @@ var bcrypt   = require('bcrypt-nodejs');
 // define the schema for our notification model
 var notificationSchema = mongoose.Schema({
 
-    notification            : {
+    notification  : {
         id        : mongoose.Schema.Types.ObjectId,
 
         spotifydInfo  : {

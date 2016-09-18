@@ -2,4 +2,7 @@
 
   source clouds/bin/activate
   
-2. 
+2. Set up mongo instance:
+	source clouds/bin/activate
+	./setUpPythonEnv.sh
+	python mongoPython/setUp.py

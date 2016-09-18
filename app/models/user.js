@@ -36,6 +36,8 @@ var userSchema = mongoose.Schema({
 
         newNotifications: [mongoose.Schema.Types.ObjectId],
 
+        oldNotifications: [mongoose.Schema.Types.ObjectId],
+
         saveSongs: [mongoose.Schema.Types.ObjectId],
 
         timeStamp: {type: Date, default: Date.now},
