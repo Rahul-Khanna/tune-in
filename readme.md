@@ -4,8 +4,7 @@
 [![Stories in Done](https://badge.waffle.io/Rahul-Khanna/tune-in.png?label=Done&title=Done)](https://waffle.io/Rahul-Khanna/tune-in)
 
 Musical Inbox  
- ----Get all your new music from your favorite artists in one place and formatted  
- ----to allow for playlist style listening!  
+ ----Get all your new music from your favorite artists in one place and formatted to allow for playlist style listening!  
 
 
 Google Cloud Info  
