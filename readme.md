@@ -1,4 +1,4 @@
-[![Stories in In Progres](https://badge.waffle.io/Rahul-Khanna/tune-in.png?label=In Progres&title=In Progres)](https://waffle.io/Rahul-Khanna/tune-in)
+[![Stories in In Progress](https://badge.waffle.io/Rahul-Khanna/tune-in.png?label=In Progress&title=In Progress)](https://waffle.io/Rahul-Khanna/tune-in)
 rahuls little project
 
 Musical Inbox  
