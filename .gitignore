@@ -2,3 +2,4 @@
 node_modules/
 python/config.ini
 python/.cache-jj12
+clientIds.txt
