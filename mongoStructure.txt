@@ -14,6 +14,8 @@ User Info:
 Artists:
 	ArtistId:
 	Name:
+	spotifyId:
+	soundCloudId:
 	timeStamp
 	numberOfUsers
 
