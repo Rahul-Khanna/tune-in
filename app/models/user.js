@@ -3,45 +3,42 @@
 var mongoose = require('mongoose');
 var bcrypt   = require('bcrypt-nodejs');
 
-// define the schema for our user model
+
 var userSchema = mongoose.Schema({
+    email: String,
+    spotifyInfo: {
+        token       : String,
+        refresh     : String,
+        id          : String,
+        userName    : String,
+        active      : Boolean
+    },
+    soundCloudInfo: {
+        token       : String,
+        refresh     : String,
+        id          : String,
+        userName    : String,
+        active      : Boolean
+    }, 
+    
+    percOfTopArtists: { type: Number, min: 0, max: 100, default: 100},
 
-    user            : {
-        id        : mongoose.Schema.Types.ObjectId,
+    possibleArtists : [
+        {
+            artistId    : mongoose.Schema.Types.ObjectId,
+            score       : {type: Number},
+        }
+    ],
 
-        spotifyInfo     : {
-            token       : String,
-            email       : String,
-            userName    : String,
-            active      : Boolean
+    following: [String],
 
-        },
-        soundcloudInfo  : {
-            token       : String,
-            email       : String,
-            userName    : String,
-            active      : Boolean
-        },
+    newNotifications: [mongoose.Schema.Types.ObjectId],
 
-        percOfTopArtists: { type: Number, min: 0, max: 100 },
+    saveSongs: [mongoose.Schema.Types.ObjectId],
 
-        possibleArtists : [
-            {
-                artistId    : mongoose.Schema.Types.ObjectId,
-                score       : {type: Number}
-            }
-        ],
+    timeStamp: {type: Date, default: Date.now},
 
-        following: [mongoose.Schema.Types.ObjectId],
-
-        newNotifications: [mongoose.Schema.Types.ObjectId],
-
-        saveSongs: [mongoose.Schema.Types.ObjectId],
-
-        timeStamp: {type: Date, default: Date.now},
-
-        lastLogin: {type: Date}
-    }
+    lastLogin: {type: Date}
 });
 
 // methods ======================

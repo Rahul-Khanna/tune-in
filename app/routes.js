@@ -50,6 +50,59 @@ module.exports = function(app, passport) {
         });
     });
 
+    app.get('/auth/spotify',
+      passport.authenticate('spotify', {scope: ['user-read-email', 'user-read-private', 'user-top-read'], showDialog: true}),
+      function(req, res){
+    // The request will be redirected to spotify for authentication, so this
+    // function will not be called.
+    });
+
+    app.get('/auth/soundcloud',
+      passport.authenticate('soundcloud'),
+      function(req, res){
+        // The request will be redirected to SoundCloud for authentication, so this
+        // function will not be called.
+      });
+
+    // GET /auth/soundcloud/callback
+    //   Use passport.authenticate() as route middleware to authenticate the
+    //   request.  If authentication fails, the user will be redirected back to the
+    //   login page.  Otherwise, the primary route function function will be called,
+    //   which, in this example, will redirect the user to the home page.
+    app.get('/auth/soundcloud/callback', 
+      passport.authenticate('soundcloud', { failureRedirect: '/login' }),
+      function(req, res) {
+        res.redirect('/profile');
+    });
+
+    // GET /auth/spotify/callback
+    //   Use passport.authenticate() as route middleware to authenticate the
+    //   request. If authentication fails, the user will be redirected back to the
+    //   login page. Otherwise, the primary route function function will be called,
+    //   which, in this example, will redirect the user to the home page.
+    app.get('/callback',
+    passport.authenticate('spotify', { failureRedirect: '/login' }),
+      function(req, res) {
+
+    console.log(req.user.spotifyInfo.token, 'req spotify token');
+
+    // console.log(req.user ,'user');
+    // console.log(req.query.code, 'code')
+    // // console.log(res);
+
+    var client_id = '6806905d214241afa14aa1b8265a9274';
+    var client_secret = 'd87f8fbfc9314a0d9bc2f958b6ee50d3';
+
+    var spotifyApi = new SpotifyWebApi({
+      clientId : client_id,
+      clientSecret : client_secret,
+      redirectUri : 'http://localhost:8888/callback'
+    });
+
+
+    res.redirect('/profile')
+    });
+
     // =====================================
     // LOGOUT ==============================
     // =====================================
@@ -57,6 +110,8 @@ module.exports = function(app, passport) {
         req.logout();
         res.redirect('/');
     });
+
+
 };
 
 // route middleware to make sure a user is logged in
