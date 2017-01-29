@@ -15,6 +15,10 @@ key = parser.get('spotify_info', 'key')
 
 url = parser.get('spotify_info','redirect')
 
+server=parser.get('main','server')
+
+database=parser.get('main','database')
+
 scope = 'user-library-read'
 
 if len(sys.argv) > 1:
@@ -27,9 +31,9 @@ token=spotify.generateUserToken(username,scope,key,secret,url)
 
 if token:
 	notifications={}
-	users=mongo.getUsers("104.196.21.189","tune-in")
-	artists=mongo.getFollowedArtistsForUsers("104.196.21.189","tune-in",users)
-	# for artist in mongo.getFollowedArtistsForUsers(mongo.getUsers("104.196.21.189","tune-in")):
+	users=mongo.getUsers(server,database)
+	artists=mongo.getFollowedArtistsForUsers(server,database,users)
+	# for artist in mongo.getFollowedArtistsForUsers(mongo.getUsers(server,database)):
 
 	# this process is to allow us to get songs for every artist in our database
 	# it can also be used to get
@@ -41,7 +45,7 @@ if token:
 		# 		f.write(str(song))
 		# 		f.write("\n")
 		pdb.set_trace()
-		ids=mongo.insertSongs("104.196.21.189","tune-in",songs)
-		mongo.addSongsToUser("104.196.21.189","tune-in",ids,users[0]._id)
+		ids=mongo.insertSongs(server,database,songs)
+		mongo.addSongsToUser(server,database,ids,users[0]._id)
 
 
