@@ -5,8 +5,8 @@ User Info:
 	% of top artists
 	Possible: Array of (ids of artists, score) (has all artists this person listens to)
 	Following: Array of ids of artists (has only the ones he/she is following)
-	New Notifications: Array of notification ids <- needs to be updated
-	Old Notifications: Array of notification ids/kept for 3 months <- needs to be cleared out
+	New Notifications: Array of song ids <- needs to be updated
+	Old Notifications: Array of song ids/kept for 3 months <- needs to be cleared out
 	Saved Songs: Array of (Song Ids)
 
 
@@ -19,16 +19,7 @@ Artists:
 
 // Store all Possible Notifications
 // Do this as a batch job, where we check all artists in the database for new songs… do this about 3 times a day
-Notifications:
-	NotificationId
-	Artist Id
-	Song Name
-	Timestamp
-	Soundcloud Info
-	Spotify Info
-
-
-figure out indexing, apparently keeping that option on is bad for scales
+// figure out indexing, apparently keeping that option on is bad for scales
 
 Song:
 	SongId
