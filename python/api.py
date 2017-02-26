@@ -5,6 +5,7 @@ from bson import ObjectId
 import sys
 from ConfigParser import SafeConfigParser
 import pdb
+parser= SafeConfigParser()
 
 parser.read('config.ini')
 

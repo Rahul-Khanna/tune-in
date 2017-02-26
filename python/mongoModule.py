@@ -5,12 +5,13 @@ from classModules import *
 import pdb
 from ConfigParser import SafeConfigParser
 import pdb
+parser= SafeConfigParser()
 
 parser.read('config.ini')
 
 serverName = parser.get('mongo','server')
 database = parser.get('mongo','database')
-loginUser = parser.get('mongo','user')
+loginUser = parser.get('mongo','user')pi
 loginPsd = parser.get('mongo','pwd')
 
 
