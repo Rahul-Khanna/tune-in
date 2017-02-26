@@ -50,7 +50,7 @@ def getAlbumsForArtist(spotifyId,location=None):
 # albums is an array of ids
 # artist is the spotify id of the artist
 # return song array
-def getSongsFromAlbumsForArtist(spotifyId,artistId,albums):
+def getSongsFromAlbumsForArtist(spotifyId,artistId,albums,recentFilter):
 	spotify=spotipy.Spotify()
 	count=0
 	songs={}
@@ -66,52 +66,66 @@ def getSongsFromAlbumsForArtist(spotifyId,artistId,albums):
 		returnedAlbums=spotify.albums(temp)
 
 		for album in returnedAlbums['albums']:
-			if album['release_date_precision']=="day":
-				releaseDayFields=album['release_date'].split("-")
-				releaseDay=datetime.date(int(releaseDayFields[0]),int(releaseDayFields[1]),int(releaseDayFields[2]))
-				today=datetime.date.today()
-				diff=today-releaseDay
-				if diff.days<31:
-					for track in album['tracks']['items']:
-						cont=False
-						artistNames=[]
-						for a in track['artists']:
-							artistNames.append(a['name'])
-							if a['id'] == spotifyId:
-								cont=True
-						if cont:
-							songName=track['name']
-							song=None
+			cont2=False
+			if recentFilter:
 
-							artistName=""
-							if len(artistNames)>1:
-								artistName+=artistNames[0]
-								artistName+=" feat. "
-								for i in range(1,len(artistNames)-1):
-									artistName+=artistNames[i]
-									artistName+=", "
-								artistName+= artistNames[len(artistNames)-1]
-							else:
-								artistName=artistNames[0]
+				if album['release_date_precision']=="day":
+					releaseDayFields=album['release_date'].split("-")
+					releaseDay=datetime.date(int(releaseDayFields[0]),int(releaseDayFields[1]),int(releaseDayFields[2]))
+					today=datetime.date.today()
+					diff=today-releaseDay
+					if diff.days<31:
+						cont2=True
 
-							# only important when dealing with songs and multiple markets
-							# so as long as a country is supplied to the getAlbumsForArtist
-							# we shouldn't have to worry about this
-							if songName+"-"+artistName in songs:
-								song=songs[songName+"-"+artistName]
-							else:
-								song = Song(songName,artistName)
-								song.artistId=artistId
-								key=song.name+"-"+song.artistName
-								songs[key]=song
+				if album['release_date_precision']=="month":
+					releaseDayFields=album['release_date'].split("-")
+					today=today=datetime.date.today()
+					if today.year==int(releaseDayFields[0]) and today.month==int(releaseDayFields[1]):
+						cont2=True
+			else:
+				cont2=True
 
-							for key in track['available_markets']:
-								value={}
-								value['id']=track['id']
-								value['url']=track['external_urls']['spotify']
-								value['uri']=track['uri']
-								value['preview_url']=track['preview_url']
-								songs[song.name+"-"+song.artistName].addSpotifyKeyValue(key,value)
+			if cont2:
+				for track in album['tracks']['items']:
+					cont=False
+					artistNames=[]
+					for a in track['artists']:
+						artistNames.append(a['name'])
+						if a['id'] == spotifyId:
+							cont=True
+					if cont:
+						songName=track['name']
+						song=None
+
+						artistName=""
+						if len(artistNames)>1:
+							artistName+=artistNames[0]
+							artistName+=" feat. "
+							for i in range(1,len(artistNames)-1):
+								artistName+=artistNames[i]
+								artistName+=", "
+							artistName+= artistNames[len(artistNames)-1]
+						else:
+							artistName=artistNames[0]
+
+						# only important when dealing with songs and multiple markets
+						# so as long as a country is supplied to the getAlbumsForArtist
+						# we shouldn't have to worry about this
+						if songName+"-"+artistName in songs:
+							song=songs[songName+"-"+artistName]
+						else:
+							song = Song(songName,artistName)
+							song.artistId=artistId
+							key=song.name+"-"+song.artistName
+							songs[key]=song
+
+						for key in track['available_markets']:
+							value={}
+							value['id']=track['id']
+							value['url']=track['external_urls']['spotify']
+							value['uri']=track['uri']
+							value['preview_url']=track['preview_url']
+							songs[song.name+"-"+song.artistName].addSpotifyKeyValue(key,value)
 
 		if count==len(albums)-1:
 			return songs.values()

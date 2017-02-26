@@ -3,12 +3,22 @@ import requests
 from bson import ObjectId
 from classModules import *
 import pdb
+from ConfigParser import SafeConfigParser
+import pdb
 
-def getUser(serverName,databaseName,userId):
+parser.read('config.ini')
+
+serverName = parser.get('main','server')
+database = parser.get('main','database')
+loginUser = parser.get('main','user')
+loginPsd = parser.get('main','pwd')
+
+
+def getUser(userId):
 	user=None
 	try:
 		client = MongoClient(serverName,27017)
-		db=client[databaseName]
+		db=client[database].authenticate(loginUser,loginPsd)
 		user=db["users"].find({"_id":userId})
 	finally:
 		client.close()
@@ -18,12 +28,12 @@ def getUser(serverName,databaseName,userId):
 	return user
 
 
-def getUsers(serverName,databaseName,ids=None):
+def getUsers(ids=None):
 	users=[]
 	temp=None
 	try:
 		client=MongoClient(serverName,27017)
-		db=client[databaseName]
+		db=client[database].authenticate(loginUser,loginPsd)
 		print("connected")
 		if ids:
 			temp=db["users"].find({"_id": {"$in" : ids}})
@@ -37,11 +47,11 @@ def getUsers(serverName,databaseName,ids=None):
 
 	return users
 
-def getArtist(serverName,databaseName,artistId):
+def getArtist(artistId):
 	artist=None
 	try:
 		client=MongoClient(serverName,27017)
-		db=client[databaseName]
+		db=client[database].authenticate(loginUser,loginPsd)
 		artist=db["artists"].find({"id":artistId})
 	finally:
 		client.close()
@@ -50,12 +60,12 @@ def getArtist(serverName,databaseName,artistId):
 
 	return artist
 
-def getArtists(serverName,databaseName,ids):
+def getArtists(ids=None):
 	artists=[]
 	temp=None
 	try:
 		client=MongoClient(serverName,27017)
-		db=client[databaseName]
+		db=client[database].authenticate(loginUser,loginPsd)
 		print("connected")
 		if ids:
 			temp=db["artists"].find({"_id":{"$in": ids}})
@@ -69,11 +79,11 @@ def getArtists(serverName,databaseName,ids):
 
 	return artists
 
-def insertSongs(serverName,databaseName,songs):
+def insertSongs(songs):
 	ids=[]
 	try:
 		client=MongoClient(serverName,27017)
-		db=client[databaseName]
+		db=client[database].authenticate(loginUser,loginPsd)
 		songCollection=db["songs"]
 		for song in songs:
 			temp=songCollection.insert_one(song.getObjectForInsert()).inserted_id
@@ -84,33 +94,20 @@ def insertSongs(serverName,databaseName,songs):
 
 	return ids
 
-def insertNotifications(serverName,databaseName,notifications):
-	ids=[]
+def addSongsToUser(songIds,userId):
 	try:
 		client=MongoClient(serverName,27017)
-		db=client[databaseName]
-		notifCollection=db["notifications"]
-		for notif in notifications:
-			ids.append(notifCollection.insert_one(eval(str(notif))).inserted_id)
-	finally:
-		client.close()
-
-	return ids
-
-def addSongsToUser(serverName,databaseName,songIds,userId):
-	try:
-		client=MongoClient(serverName,27017)
-		db=client[databaseName]
+		db=client[database].authenticate(loginUser,loginPsd)
 		for songId in songIds:
 			# print type(notifId)
 			db["users"].update_one({"_id": userId},{"$push":{"newSongs":songId}})
 	finally:
 		client.close()
 
-def getFollowedArtistsForUsers(serverName,databaseName,users):
+def getFollowedArtistsForUsers(users):
 	allArtists={}
 	for user in users:
-		temp=getArtists(serverName,databaseName,user.following)
+		temp=getArtists(user.following)
 		for artist in temp:
 			if artist._id not in allArtists:
 				allArtists[artist._id]=artist
