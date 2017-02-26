@@ -8,10 +8,10 @@ import pdb
 
 parser.read('config.ini')
 
-serverName = parser.get('main','server')
-database = parser.get('main','database')
-loginUser = parser.get('main','user')
-loginPsd = parser.get('main','pwd')
+serverName = parser.get('mongo','server')
+database = parser.get('mongo','database')
+loginUser = parser.get('mongo','user')
+loginPsd = parser.get('mongo','pwd')
 
 
 def getUser(userId):
