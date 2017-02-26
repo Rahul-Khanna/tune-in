@@ -5,8 +5,8 @@ User Info:
 	% of top artists
 	Possible: Array of (ids of artists, score) (has all artists this person listens to)
 	Following: Array of ids of artists (has only the ones he/she is following)
-	New Notifications: Array of song ids <- needs to be updated
-	Old Notifications: Array of song ids/kept for 3 months <- needs to be cleared out
+	New Songs: Array of song ids <- needs to be updated
+	Old Songs: Array of song ids/kept for 3 months <- needs to be cleared out
 	Saved Songs: Array of (Song Ids)
 
 
