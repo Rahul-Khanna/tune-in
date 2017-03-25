@@ -22,7 +22,7 @@ def getUser(userId):
 		db=client[database]
 		db.authenticate(loginUser,loginPsd)
 		userId=ObjectId(str(userId))
-		print type(userId)
+		# print type(userId)
 		try:
 			user=db["users"].find({"_id":userId})
 		except:
@@ -30,7 +30,7 @@ def getUser(userId):
 	finally:
 		client.close()
 	user=convertJsonToUser(user[0])
-	print str(user)
+	print "got user"
 	return user
 
 
@@ -51,6 +51,7 @@ def getUsers(ids=None):
 	for user in temp:
 		users.append(convertJsonToUser(user))
 
+	print "got users"
 	return users
 
 def getArtist(artistId):
@@ -65,35 +66,30 @@ def getArtist(artistId):
 
 	artist=convertJsonToArtist(artist)
 
+	print "got artist"
 	return artist
 
 def getArtists(ids=None):
 	artists=[]
 	temp=None
-	print "hi"
 	try:
 		client=MongoClient(serverName,27017)
 		db=client[database]
 		db.authenticate(loginUser,loginPsd)
-		print "hi"
 		try :
 			if ids:
-				print "ids"
 				temp=db["artists"].find({"_id":{"$in": ids}})
-				print "ids2"
 			else:
 				temp=db["artists"].find()
 		except :
-			print "nope"
 	finally:
 		client.close()
 
 	for artist in temp:
 		artists.append(convertJsonToArtist(artist))
 
-	print str(artists)
-
 	if len(artists) > 0:
+		print "got artists"
 		return artists
 
 	print "no artists in db"
@@ -111,6 +107,7 @@ def insertSongs(songs):
 			song._id=temp
 			ids.append(temp)
 	finally:
+		print "inserted songs"
 		client.close()
 
 	return ids
@@ -120,10 +117,11 @@ def addSongsToUser(songIds,userId):
 		client=MongoClient(serverName,27017)
 		db=client[database]
 		db.authenticate(loginUser,loginPsd)
+		userId=ObjectId(str(userId))
 		for songId in songIds:
-			# print type(notifId)
-			db["users"].update_one({"_id": userId},{"$push":{"newSongs":songId}})
+			result=db["users"].update_one({"_id": userId},{"$push":{"newSongs":songId}})
 	finally:
+		print "added songs to a user"
 		client.close()
 
 def getFollowedArtistsForUsers(users):
@@ -134,6 +132,7 @@ def getFollowedArtistsForUsers(users):
 			if artist._id not in allArtists:
 				allArtists[artist._id]=artist
 
+	print "got artists for users"
 	return allArtists.values()
 
 

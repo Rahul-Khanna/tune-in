@@ -26,7 +26,7 @@ def generateUserToken(username,scope,key,secret,url):
 def getAlbumsForArtist(spotifyId,location=None):
 	spotify=spotipy.Spotify()
 	albums=[]
-	names=[]
+	# names=[]
 	while(True):
 		# pdb.set_trace()
 		# check if this actually works, not skipping one after every 50
@@ -40,15 +40,15 @@ def getAlbumsForArtist(spotifyId,location=None):
 				# 		names.append(album)
 				albums.append(album['id'])
 		else:
-			with open("artsits","a+") as f:
-				for tup in names:
-					f.write(str(tup))
-					f.write("\n")
-			with open("albums","a+") as f:
-				for i in albums:
-					f.write(str(i))
-					f.write("\n")
-
+			# with open("artsits","a+") as f:
+			# 	for tup in names:
+			# 		f.write(str(tup))
+			# 		f.write("\n")
+			# with open("albums","a+") as f:
+			# 	for i in albums:
+			# 		f.write(str(i))
+			# 		f.write("\n")
+			print "got albums"
 			return albums
 
 # albums is an array of ids
@@ -89,6 +89,7 @@ def getSongsFromAlbumsForArtist(spotifyId,artistId,albums,recentFilter):
 				cont2=True
 
 			if cont2:
+				image=album['images'][0]['url']
 				for track in album['tracks']['items']:
 					cont=False
 					artistNames=[]
@@ -129,9 +130,11 @@ def getSongsFromAlbumsForArtist(spotifyId,artistId,albums,recentFilter):
 							value['url']=track['external_urls']['spotify']
 							value['uri']=track['uri']
 							value['preview_url']=track['preview_url']
+							value['image']=image
 							songs[song.name+"-"+song.artistName].addSpotifyKeyValue(key,value)
 
 		if count==len(albums)-1:
+			print "got songs from an album from a specific artist perspective"
 			return songs.values()
 
 
