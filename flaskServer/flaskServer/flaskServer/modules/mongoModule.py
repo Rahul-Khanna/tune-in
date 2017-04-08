@@ -1,10 +1,11 @@
+from gevent import monkey
+monkey.patch_all()
 from pymongo import *
 import requests
 from bson import ObjectId
 from classModules import *
 import pdb
 from ConfigParser import SafeConfigParser
-import pdb
 parser= SafeConfigParser()
 
 # parser.read('/Users/rahulkhanna/tune-in/flaskServer/flaskServer/flaskServer/modules/config.ini')
@@ -23,10 +24,7 @@ def getUser(userId):
 		db.authenticate(loginUser,loginPsd)
 		userId=ObjectId(str(userId))
 		# print type(userId)
-		try:
-			user=db["users"].find({"_id":userId})
-		except:
-			print "lol"
+		user=db["users"].find({"_id":userId})
 	finally:
 		client.close()
 	user=convertJsonToUser(user[0])
@@ -54,6 +52,21 @@ def getUsers(ids=None):
 	print "got users"
 	return users
 
+def createUser(user):
+	try:
+		client=MongoClient(serverName,27017)
+		db=client[database]
+		db.authenticate(loginUser,loginPsd)
+		userCollection=db["users"]
+		temp=userCollection.insert_one(user.getObjectForInsert()).inserted_id
+		user._id=temp
+	finally:
+		print "inserted user"
+		client.close()
+
+	return {'user' : user, 'id' : temp}
+
+
 def getArtist(artistId):
 	artist=None
 	try:
@@ -76,12 +89,10 @@ def getArtists(ids=None):
 		client=MongoClient(serverName,27017)
 		db=client[database]
 		db.authenticate(loginUser,loginPsd)
-		try :
-			if ids:
-				temp=db["artists"].find({"_id":{"$in": ids}})
-			else:
-				temp=db["artists"].find()
-		except :
+		if ids:
+			temp=db["artists"].find({"_id":{"$in": ids}})
+		else:
+			temp=db["artists"].find()
 	finally:
 		client.close()
 
@@ -95,6 +106,26 @@ def getArtists(ids=None):
 	print "no artists in db"
 	return
 
+def insertArtists(artists):
+	ids=[]
+	try:
+		client=MongoClient(serverName,27017)
+		db=client[database]
+		db.authenticate(loginUser,loginPsd)
+		artistCollection=db["artists"]
+		temp=[]
+		for artist in artists:
+			temp.append(artist.getObjectForInsert())
+		result=artistCollection.insert_many(temp).inserted_ids
+		for i in range(len(result)):
+			artists[i]._id=result[i]
+			ids.append(result[i])
+	finally:
+		print "inserted artists"
+		client.close()
+
+	return {'artists' : artists, 'ids' : ids}
+
 def insertSongs(songs):
 	ids=[]
 	try:
@@ -102,15 +133,18 @@ def insertSongs(songs):
 		db=client[database]
 		db.authenticate(loginUser,loginPsd)
 		songCollection=db["songs"]
+		temp=[]
+
 		for song in songs:
-			temp=songCollection.insert_one(song.getObjectForInsert()).inserted_id
-			song._id=temp
-			ids.append(temp)
+			temp.append(song.getObjectForInsert())
+		result=songCollection.insert_many(temp).inserted_ids
+		for i in range(len(result)):
+			songs[i]._id=result[i]
+			ids.append(result[i])
 	finally:
 		print "inserted songs"
 		client.close()
-
-	return ids
+	return {'songs' : songs, 'ids' : ids}
 
 def addSongsToUser(songIds,userId):
 	try:
@@ -123,6 +157,8 @@ def addSongsToUser(songIds,userId):
 	finally:
 		print "added songs to a user"
 		client.close()
+
+	return True
 
 def getFollowedArtistsForUsers(users):
 	allArtists={}

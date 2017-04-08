@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import logging
+#activate_this ="/Users/rahulkhanna/tune-in/flaskServer/flaskServer/flaskServer/clouds/bin/activate_this.py"
 activate_this = '/var/www/flaskServer/flaskServer/clouds/bin/activate_this.py'
 execfile(activate_this, dict(__file__=activate_this))
 logging.basicConfig(stream=sys.stderr)

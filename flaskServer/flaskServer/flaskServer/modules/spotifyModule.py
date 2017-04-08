@@ -1,3 +1,5 @@
+from gevent import monkey
+monkey.patch_all()
 import spotipy
 import spotipy.util as util
 from classModules import Song

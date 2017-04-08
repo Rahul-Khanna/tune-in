@@ -6,7 +6,7 @@ import subprocess
 import sys
 # sys.path.append("/Users/rahulkhanna/tune-in/flaskServer/flaskServer/flaskServer/modules")
 sys.path.append("/home/dev/web/www/flaskServer/flaskServer/modules")
-from api import *
+import api
 app = Flask(__name__)
 
 @app.route("/")
@@ -23,12 +23,15 @@ def hello():
 
 @app.route("/tune_in/api/v1.0/login", methods=['POST'])
 def user_log_in():
-	if not request.json or not 'user' in request.json:
+	if not request.json or not 'user_id' in request.json \
+	or not 'topArtists' in request.json:
 		abort(400)
-	value = loginCall(request.json['user'])
+	connection=request.json['user_id'].split("|")[1].lower()
+	user_name=request.json['user_id'].split("|")[2].lower()
+	value = api.loginCall(connection,user_name,request.json['topArtists']["items"])
 	if value == "Success":
-		return jsonify({'status' : 'success',  'user' : request.json['user']})
+		return jsonify({'status' : 'success',  'user' : user_name})
 	else:
-		return jsonify({'status' : 'false', 'user' : request.json['user']})
+		return jsonify({'status' : 'false', 'user' : user_name})
 if __name__ == "__main__":
 	app.run(debug = True)

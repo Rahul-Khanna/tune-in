@@ -1,5 +1,6 @@
 import time
 from bson import ObjectId
+import pdb
 
 class Song:
 
@@ -118,6 +119,17 @@ class Artist:
 		else:
 			self.numberOfUsers=-1
 
+	def getObjectForInsert(self):
+		output={
+			"name":self.name,
+			"spotifyId":self.spotifyId,
+			"soundCloudId":self.soundCloudId,
+			"timeStamp":self.timeStamp,
+			"numberOfUsers":self.numberOfUsers
+		}
+
+		return output
+
 	def __repr__(self):
 		output={
 			"id":self._id,
@@ -153,8 +165,7 @@ def convertJsonToArtist(json):
 
 
 class User:
-
-	def __init__(self,id,soundCloudInfo=None,spotifyInfo=None,percOfTopArtists=None,possible=None,following=None,newSongs=None,oldSongs=None,savedSongs=None,timeStamp=None):
+	def __init__(self,id,soundCloudInfo=None,spotifyInfo=None,percOfTopArtists=100,possible=None,following=None,newSongs=None,oldSongs=None,savedSongs=None,timeStamp=None):
 		self._id=id
 
 		if soundCloudInfo:
@@ -169,8 +180,6 @@ class User:
 
 		if percOfTopArtists:
 			self.percOfTopArtists=percOfTopArtists
-		else:
-			self.percOfTopArtists=100
 
 		if possible:
 			self.possible=possible
@@ -201,8 +210,6 @@ class User:
 			self.timeStamp=timeStamp
 		else:
 			self.timeStamp=time.time()
-
-
 
 	def addArtistIdsToPossible(self,artistIds):
 		self.possible.append(artistIds)
@@ -237,6 +244,21 @@ class User:
 
 	def removeSongIdsFromSavedSongs(self,songIds):
 		self.savedSongs=list(set(self.savedSongs)-set(songIds))
+
+	def getObjectForInsert(self):
+		output={
+			"soundCloudInfo":self.soundCloudInfo,
+			"spotifyInfo":self.spotifyInfo,
+			"percOfTopArtists":self.percOfTopArtists,
+			"possible":self.possible,
+			"following":self.following,
+			"newSongs":self.newSongs,
+			"oldSongs":self.oldSongs,
+			"savedSongs":self.savedSongs,
+			"timeStamp":self.timeStamp
+		}
+
+		return output
 
 	def __repr__(self):
 		output={
