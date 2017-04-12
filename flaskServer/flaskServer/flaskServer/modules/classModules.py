@@ -1,6 +1,7 @@
 import time
 from bson import ObjectId
 import pdb
+from Queue import Queue
 
 class Song:
 
@@ -308,3 +309,18 @@ def convertJsonToUser(json):
 		user.timeStamp=json['timeStamp']
 
 	return user
+
+class SetQueue(Queue):
+
+	def __init__(self, maxsize=0):
+		Queue.__init__(self, maxsize)
+		self.all_items = set()
+
+	def _put(self, item):
+		if item not in self.all_items:
+			Queue._put(self, item) 
+			self.all_items.add(item)
+		else:
+			self.unfinished_tasks+=-1
+
+
