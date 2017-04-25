@@ -1,4 +1,11 @@
+
 .DS_Store
 node_modules/
-python/config.ini
-python/.cache-jj12
+flaskServer/config.ini
+flaskServer/.cache*
+clientIds.txt
+flaskServer/flaskServer/flaskServer/clouds/
+flaskServer/flaskServer/flaskServer/modules/config.ini
+flaskServer/testFiles/config.ini
+clouds/*
+*.pyc
