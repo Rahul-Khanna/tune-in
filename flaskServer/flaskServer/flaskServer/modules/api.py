@@ -1,5 +1,5 @@
-from gevent import monkey
-monkey.patch_all()
+# from gevent import monkey
+# monkey.patch_all()
 import spotifyModule as spotify
 import mongoModule as mongo
 import classModules as objects
@@ -22,14 +22,14 @@ def loginCall(connection,id,topArtists,location=None):
 			artistResults=mongo.insertArtists(artists)
 			user=objects.User(id=1,possible=artistResults['ids'],following=artistResults['ids'])
 			user.spotifyInfo["id"] = id
-			user=mongo.createUser(user)['user']
+			userId=mongo.createUser(user)['id']
 
 			for artist in artistResults['artists']:
 				albums=spotify.getAlbumsForArtist(artist.spotifyId,location="US")
-				songs=spotify.getSongsFromAlbumsForArtist(artist.spotifyId,artist._id,albums,True)
+				songs=spotify.getSongsFromAlbumsForArtist(artist.spotifyId, artist._id, albums,True)
 				if len(songs):
 					songResults=mongo.insertSongs(songs)
-					mongo.addSongsToUser(songResults['ids'],user._id)
+					mongo.addSongsToUser(songResults['ids'], userId)
 
 		return "Success"
 	except:

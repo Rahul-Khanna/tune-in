@@ -1,5 +1,5 @@
-from gevent import monkey
-monkey.patch_all()
+# from gevent import monkey
+# monkey.patch_all()
 from pymongo import *
 import requests
 from bson import ObjectId
@@ -8,7 +8,7 @@ import pdb
 from ConfigParser import SafeConfigParser
 parser= SafeConfigParser()
 
-# parser.read('/Users/rahulkhanna/tune-in/flaskServer/flaskServer/flaskServer/modules/config.ini')
+# parser.read('/Users/rahulkhanna/Documents/tune-in/flaskServer/flaskServer/flaskServer/modules/config.ini')
 parser.read('/home/dev/web/www/flaskServer/flaskServer/modules/config.ini')
 serverName = parser.get('mongo','server')
 database = parser.get('mongo','database')
