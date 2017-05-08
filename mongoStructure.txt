@@ -18,6 +18,8 @@ Artists:
 	soundCloudId:
 	timeStamp
 	numberOfUsers
+	spotifyAlbums
+	soundCloudAlbums
 
 // Store all Possible Notifications
 // Do this as a batch job, where we check all artists in the database for new songs… do this about 3 times a day
@@ -26,6 +28,7 @@ Artists:
 Song:
 	SongId
 	ArtistId
+	artistNames
 	Song Name
 	Timestamp
 	Soundcloud Info
