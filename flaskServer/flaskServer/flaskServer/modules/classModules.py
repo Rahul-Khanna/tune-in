@@ -108,7 +108,7 @@ def convertJsonToSong(json):
 
 class Artist:
 
-	def __init__(self,name,id=None,timeStamp=None,soundCloudId=None,spotifyId=None,numberOfUsers=None):
+	def __init__(self, name, id=None, timeStamp=None, soundCloudId=None, spotifyId=None, numberOfUsers=None, spotifyAlbums=None, soundCloudAlbums=None):
 
 		self.name=name
 
@@ -137,13 +137,25 @@ class Artist:
 		else:
 			self.numberOfUsers=-1
 
+		if spotifyAlbums:
+			self.spotifyAlbums = spotifyAlbums
+		else:
+			self.spotifyAlbums = {}
+
+		if soundCloudAlbums:
+			self.soundCloudAlbums = soundCloudAlbums
+		else:
+			self.soundCloudAlbums = {}
+
 	def getObjectForInsert(self):
 		output={
-			"name":self.name,
-			"spotifyId":self.spotifyId,
-			"soundCloudId":self.soundCloudId,
-			"timeStamp":self.timeStamp,
-			"numberOfUsers":self.numberOfUsers
+			"name" : self.name,
+			"spotifyId" : self.spotifyId,
+			"soundCloudId" : self.soundCloudId,
+			"timeStamp" : self.timeStamp,
+			"numberOfUsers" : self.numberOfUsers,
+			"spotifyAlbums" : self.spotifyAlbums,
+			"soundCloudAlbums" : self.soundCloudAlbums
 		}
 
 		return output
@@ -155,7 +167,9 @@ class Artist:
 			"spotifyId":self.spotifyId,
 			"soundCloudId":self.soundCloudId,
 			"timeStamp":self.timeStamp,
-			"numberOfUsers":self.numberOfUsers
+			"numberOfUsers":self.numberOfUsers,
+			"spotifyAlbums" : self.spotifyAlbums,
+			"soundCloudAlbums" : self.soundCloudAlbums
 		}
 
 		return str(output)
@@ -178,6 +192,12 @@ def convertJsonToArtist(json):
 
 	if 'numberOfUsers' in json:
 		artist.numberOfUsers=json['numberOfUsers']
+
+	if 'soundCloudAlbums' in json:
+		artist.soundCloudAlbums = json['soundCloudAlbums']
+
+	if 'spotifyAlbums' in json:
+		artist.spotifyAlbums = json['spotifyAlbums']
 
 	return artist
 

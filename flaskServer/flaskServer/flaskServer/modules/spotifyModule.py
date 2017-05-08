@@ -34,37 +34,47 @@ def generateUserToken(username,scope,key,secret,url):
 
 	return token
 
-def _getAlbumsForArtist(spotifyId, location, offsets, responses, i):
+def _getAlbumsForArtist(artist, location, offsets, responses, i):
 	spotify=spotipy.Spotify()
 	while True:
 		offset=offsets.get()
-		returnedAlbums=spotify.artist_albums(artist_id=str(spotifyId),country=location,limit=50,offset=offset)
+		returnedAlbums=spotify.artist_albums(artist_id=str(artist.spotifyId), country=location, limit=50, offset=offset)
 		
 		if len(returnedAlbums['items']):
 			for album in returnedAlbums['items']:
-				responses.put(QueItem(album['id']))
+				albumId = album['id']
+				if albumId in artist.spotifyAlbums:
+					markets = []
+					for market in album["available_markets"]:
+						if market not in artist.spotifyAlbums[albumId]:
+							markets.append(market)
+					if len(markets):
+						responses.put(QueItem(albumId, markets))
+				else:
+					responses.put(QueItem(albumId, album["available_markets"]))
 			offsets.put(QueItem(int(offset+len(returnedAlbums['items']))))
 
 		offsets.task_done()
 
 		
 
-# for a given artist_id return a list of albumIds
-def getAlbumsForArtist(spotifyId,location=None):
-	albums=[]
+# for a given artist_id return a dictionary of albumId : [markets]
+def getAlbumsForArtist(artist, location=None):
+	albums={}
 	offsets=SetQueue()
 	responses=SetQueue()
 	initialOffsets=[QueItem(0), QueItem(50), QueItem(100), QueItem(150)]
 
 	for i in range(len(initialOffsets)):
-		worker=Thread(target=_getAlbumsForArtist, name=str(i), args=(spotifyId,location,offsets,responses,i))
+		worker=Thread(target=_getAlbumsForArtist, name=str(i), args=(artist, location, offsets, responses, i))
 		worker.daemon = True
 		worker.start()
 
 	map(offsets.put,initialOffsets)
 	offsets.join()
 	while not responses.empty():
-		albums.append(responses.get())
+		item = responses.get()
+		albums[item.key] = item.value
 
 	return albums
 
@@ -126,7 +136,7 @@ def _getSongsFromAlbumsForArtist(spotifyId, artistId, albums, intervals, songs, 
 							songs.put(QueItem(key,song))
 		intervals.task_done()
 
-def getSongsFromAlbumsForArtist(spotifyId, artistId, albums, recentFilter = True):
+def getSongsFromAlbumsForArtist(spotifyId, artistId, albums, outputQue, recentFilter = True):
 	"""
 		Gets all songs for an array of album ids associated with a Spotify artists
 
@@ -173,8 +183,10 @@ def getSongsFromAlbumsForArtist(spotifyId, artistId, albums, recentFilter = True
 			song.mergeSpotifyInfo(item.value)
 			songs[item.key] = song
 
+	for song in songs.values():
+		outputQue.put(song)
+
 	print "got songs from an album from a specific artist perspective"
-	return songs.values()
 
 
 

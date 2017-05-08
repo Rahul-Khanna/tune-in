@@ -7,6 +7,8 @@ from classModules import *
 import pdb
 from ConfigParser import SafeConfigParser
 parser= SafeConfigParser()
+from Queue import Queue
+from threading import Thread
 
 # parser.read('/Users/rahulkhanna/Documents/tune-in/flaskServer/flaskServer/flaskServer/modules/config.ini')
 parser.read('/home/dev/web/www/flaskServer/flaskServer/modules/config.ini')
@@ -15,6 +17,7 @@ database = parser.get('mongo','database')
 loginUser = parser.get('mongo','user')
 loginPsd = parser.get('mongo','pwd')
 
+MAX_NUMBER_OF_THREADS = 8
 
 def getUser(userId):
 	user=None
@@ -24,7 +27,7 @@ def getUser(userId):
 		db.authenticate(loginUser,loginPsd)
 		userId=ObjectId(str(userId))
 		# print type(userId)
-		user=db["users"].find({"_id":userId})
+		user=db["users"].find_one({"_id":userId})
 	finally:
 		client.close()
 	user=convertJsonToUser(user[0])
@@ -73,7 +76,7 @@ def getArtist(artistId):
 		client=MongoClient(serverName,27017)
 		db=client[database]
 		db.authenticate(loginUser,loginPsd)
-		artist=db["artists"].find({"id":artistId})
+		artist=db["artists"].find_one({"_id":artistId})
 	finally:
 		client.close()
 
@@ -134,42 +137,73 @@ def insertSongs(songs):
 		db.authenticate(loginUser,loginPsd)
 		songCollection=db["songs"]
 		temp=[]
-
 		for song in songs:
 			temp.append(song.getObjectForInsert())
+
 		result=songCollection.insert_many(temp).inserted_ids
+
 		for i in range(len(result)):
 			songs[i]._id=result[i]
 			ids.append(result[i])
+
 	finally:
 		print "inserted songs"
 		client.close()
 	return {'songs' : songs, 'ids' : ids}
 
-def addSongsToUser(songIds,userId):
+def _addSongsToUser(userId, songs, i=None):
 	try:
-		client=MongoClient(serverName,27017)
-		db=client[database]
+		client = MongoClient(serverName,27017)
+		db = client[database]
 		db.authenticate(loginUser,loginPsd)
-		userId=ObjectId(str(userId))
-		for songId in songIds:
-			result=db["users"].update_one({"_id": userId},{"$push":{"newSongs":songId}})
+		userId = ObjectId(str(userId))
+		while True:
+			songId=songs.get()
+			db["users"].update_one({"_id": userId},{"$push":{"newSongs":songId}})
+			songs.task_done()
 	finally:
-		print "added songs to a user"
 		client.close()
 
+def addSongsToUser(songIds, userId):
+	songs=Queue()
+	for i in range(MAX_NUMBER_OF_THREADS):
+		worker=Thread(target=_addSongsToUser, name=str(i), args=(userId, songs, i))
+		worker.daemon = True
+		worker.start()
+
+	for songId in songIds:
+		songs.put(songIds)
+	
+	songs.join()
+	print "added songs to a user"
 	return True
 
-def getFollowedArtistsForUsers(users):
-	allArtists={}
-	for user in users:
-		temp=getArtists(user.following)
-		for artist in temp:
-			if artist._id not in allArtists:
-				allArtists[artist._id]=artist
+def updateAlbumsForArtist(artist, newAlbums):
+	try:
+		client = MongoClient(serverName,27017)
+		db = client[database]
+		db.authenticate(loginUser,loginPsd)
+		artistId = ObjectId(str(artist._id))
+		albums = db["artists"].find_one({"_id":artistId})["spotifyAlbums"]
+		for albumId in newAlbums:
+			if albumId  not in albums:
+				albums[albumId] = {}
+				artist.spotifyAlbums[albumId]={}
 
-	print "got artists for users"
-	return allArtists.values()
+			for regionKey in newAlbums[albumId]:
+				if regionKey not in albums[albumId]:
+					albums[albumId][regionKey] = 1
+					artist.spotifyAlbums[albumId][regionKey]=1
+
+		db["artists"].update_one({"_id":artistId}, {"$set":{"spotifyAlbums":albums}})
+
+	finally:
+		client.close()
+
+
+
+
+
 
 
 
