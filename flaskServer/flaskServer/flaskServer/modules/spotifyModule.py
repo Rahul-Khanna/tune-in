@@ -3,6 +3,7 @@
 import spotipy
 import spotipy.util as util
 from classModules import Song
+from classModules import QueItem
 from classModules import SetQueue
 import datetime
 from Queue import Queue
@@ -11,11 +12,14 @@ import sys
 
 import pdb
 
-maxNumberOfThreads=8
+MAX_NUMBER_OF_THREADS = 8
 
-badArtists={
+BAD_ARTISTS = {
 	"0LyfQWJT6nXafLPZqxe9Of" : 1
 }
+
+MONTH = "month"
+DAY = "day"
 
 def generateUserToken(username,scope,key,secret,url):
 	token=None
@@ -30,51 +34,19 @@ def generateUserToken(username,scope,key,secret,url):
 
 	return token
 
-def _getAlbumsForArtist(spotifyId,location,q,r,f,i):
+def _getAlbumsForArtist(spotifyId, location, offsets, responses, i):
 	spotify=spotipy.Spotify()
 	while True:
-		# print "Line 1 of loop, I am thread " + str(i)
-		# print "The size of the queue is " + str(q.unfinished_tasks) + " thread: " + str(i)
-
-		offset=q.get()
-		# print "Thread Top : " +str(i)
-		# print str(int(offset+len(returnedAlbums['items'])))
-		# print q.unfinished_tasks
-		# print q.qsize()
-		# print "Thread Top : "+str(i)
-		# print offset
+		offset=offsets.get()
 		returnedAlbums=spotify.artist_albums(artist_id=str(spotifyId),country=location,limit=50,offset=offset)
 		
 		if len(returnedAlbums['items']):
 			for album in returnedAlbums['items']:
-				r.put(album['id'])
-			sucess=q.put(int(offset+len(returnedAlbums['items'])))
-			# if not sucess:
-			# 	print "got in here"
-				# q.task_done()
-			# print "I put these items inside " + str(len(returnedAlbums['items'])) + " thread: " +str(i)
+				responses.put(QueItem(album['id']))
+			offsets.put(QueItem(int(offset+len(returnedAlbums['items']))))
 
-		q.task_done()
-		# print "Thread : " +str(i)
-		# print str(int(offset+len(returnedAlbums['items'])))
-		# print q.unfinished_tasks
-		# print q.qsize()
-		# print "Thread : "+str(i)
-		# print "Now the size of the queue is: "+ str(q.unfinished_tasks) + " thread: "+str(i)
-		# print str(r.qsize()) + " thread:" +str(i)
+		offsets.task_done()
 
-		# if len(returnedAlbums['items']):
-		# 	# print "put something into queue, thread: "+str(i)
-			
-			
-		# 		print "got here"
-				# offset=q.get()
-				# print offset
-				
-		# else:
-		# 	print "Thread is done: "+str(i)
-		# 	print "Size of the queue is: " + str(q.unfinished_tasks) + " thread: " +str(i)
-		# 	# f.put(i)
 		
 
 # for a given artist_id return a list of albumIds
@@ -82,125 +54,59 @@ def getAlbumsForArtist(spotifyId,location=None):
 	albums=[]
 	offsets=SetQueue()
 	responses=SetQueue()
-	finishes=Queue()
-	initialOffsets=[0,50,100,150]
+	initialOffsets=[QueItem(0), QueItem(50), QueItem(100), QueItem(150)]
 
 	for i in range(len(initialOffsets)):
-		worker=Thread(target=_getAlbumsForArtist, name=str(i), args=(spotifyId,location,offsets,responses,finishes,i))
+		worker=Thread(target=_getAlbumsForArtist, name=str(i), args=(spotifyId,location,offsets,responses,i))
 		worker.daemon = True
 		worker.start()
 
 	map(offsets.put,initialOffsets)
-	# offsets.put(0)
-	# offsets.put(50)
-	# # offsets.put(100)
-	# # offsets.put(150)
-	# print offsets.unfinished_tasks
-	# print offsets.qsize()
-	# print "put tasks in queue"
-	# i=0
-	# while(i<2):
-	# 	val = finishes.get()
-	# 	i+=1
-	# 	print str(i)
 	offsets.join()
 	while not responses.empty():
 		albums.append(responses.get())
 
-		# returnedAlbums=spotify.artist_albums(artist_id=str(spotifyId),country=location,limit=50,offset=len(albums))
-		# # return returnedAlbums
-		# if len(returnedAlbums['items'])>0:
-		# 	for album in returnedAlbums['items']:
-		# 		# for i in range(0,len(album['artists'])):
-		# 		# 	names.append((int(i+1),album['artists'][i]['id'],album['artists'][i]['name']))
-		# 		# 	if i==0 and str(spotifyId)!=str(album['artists'][i]['id']):
-		# 		# 		names.append(album)
-		# 		albums.append(album['id'])
-		# else:
-		# 	# with open("artsits","a+") as f:
-		# 	# 	for tup in names:
-		# 	# 		f.write(str(tup))
-		# 	# 		f.write("\n")
-		# 	# with open("albums","a+") as f:
-		# 	# 	for i in albums:
-		# 	# 		f.write(str(i))
-		# 	# 		f.write("\n")
-	print "got albums"
 	return albums
-	# sys.exit(0)
 
-# albums is an array of ids
-# artist is the spotify id of the artist
-# return song array
-def getSongsFromAlbumsForArtist(spotifyId,artistId,albums,recentFilter):
-	spotify=spotipy.Spotify()
-	count=0
+def _getSongsFromAlbumsForArtist(spotifyId, artistId, albums, intervals, songs, songAdditions, recentFilter = True, i = None):
 	today=datetime.date.today()
-	songs={}
-	while(True):
-		temp=[]
-		plusTwenty=min(len(albums)-1,count+20)
-		while count<plusTwenty:
-			temp.append(albums[count])
-			count+=1
-
-		# pdb.set_trace()
-		# look into next not being None
-		returnedAlbums=spotify.albums(temp)
+	spotify=spotipy.Spotify()
+	while True:
+		interval=intervals.get().key
+		returnedAlbums=spotify.albums(interval)
 
 		for album in returnedAlbums['albums']:
-			cont2=False
+			recent=True
 			if recentFilter:
-
-				if album['release_date_precision']=="day":
+				if album['release_date_precision'] == DAY:
 					releaseDayFields=album['release_date'].split("-")
 					releaseDay=datetime.date(int(releaseDayFields[0]),int(releaseDayFields[1]),int(releaseDayFields[2]))
 					diff=today-releaseDay
-					if diff.days<31:
-						cont2=True
+					if diff.days>31:
+						recent = False
 
-				if album['release_date_precision']=="month":
+				elif album['release_date_precision'] == MONTH:
 					releaseDayFields=album['release_date'].split("-")
-					if today.year==int(releaseDayFields[0]) and today.month==int(releaseDayFields[1]):
-						cont2=True
-			else:
-				cont2=True
+					if not (today.year==int(releaseDayFields[0]) and today.month==int(releaseDayFields[1])):
+						recent = False
 
-			if cont2:
-				image=album['images'][0]['url']
+				else:
+					recent = False
+
+			if recent:
+				image = album['images'][0]['url']
 				for track in album['tracks']['items']:
-					cont=False
-					artistNames=[]
+					relevant = False
+					artistNames = []
 					for a in track['artists']:
-						if a['id'] not in badArtists:
+						if a['id'] not in BAD_ARTISTS:
 							artistNames.append(a['name'])
 							if a['id'] == spotifyId:
-								cont=True
-					if cont:
+								relevant = True
+					if relevant:
 						songName=track['name']
-						song=None
-
-						artistName=""
-						if len(artistNames)>1:
-							artistName+=artistNames[0]
-							artistName+=" feat. "
-							for i in range(1,len(artistNames)-1):
-								artistName+=artistNames[i]
-								artistName+=", "
-							artistName+= artistNames[len(artistNames)-1]
-						else:
-							artistName=artistNames[0]
-
-						# only important when dealing with songs and multiple markets
-						# so as long as a country is supplied to the getAlbumsForArtist
-						# we shouldn't have to worry about this
-						if songName+"-"+artistName in songs:
-							song=songs[songName+"-"+artistName]
-						else:
-							song = Song(songName,artistName)
-							song.artistId=artistId
-							key=song.name+"-"+song.artistName
-							songs[key]=song
+						song = Song(songName,artistNames)
+						song.artistId=artistId
 
 						for key in track['available_markets']:
 							value={}
@@ -209,11 +115,66 @@ def getSongsFromAlbumsForArtist(spotifyId,artistId,albums,recentFilter):
 							value['uri']=track['uri']
 							value['preview_url']=track['preview_url']
 							value['image']=image
-							songs[song.name+"-"+song.artistName].addSpotifyKeyValue(key,value)
+							value['album_id'] = album['id']
+							song.addSpotifyKeyValue(key,value)
 
-		if count==len(albums)-1:
-			print "got songs from an album from a specific artist perspective"
-			return songs.values()
+						key = song.getKey()
+
+						if songs.checkForKey(key):
+							songAdditions.put(QueItem(key,song))
+						else:
+							songs.put(QueItem(key,song))
+		intervals.task_done()
+
+def getSongsFromAlbumsForArtist(spotifyId, artistId, albums, recentFilter = True):
+	"""
+		Gets all songs for an array of album ids associated with a Spotify artists
+
+		Params:
+			spotifyId          (str) : artist's spotify id
+			artistId (bson.ObjectId) : mongo id associated with the artist
+			albums             (arr) : array of spotify album ids
+			recentFilter      (bool) : indicates whether albums should be checked for recency
+
+		Returns:
+			(arr) : songs
+	"""
+	intervals=Queue()
+	songQue=SetQueue()
+	songAdditionsQue=Queue()
+
+	for i in range(MAX_NUMBER_OF_THREADS):
+		worker=Thread(target=_getSongsFromAlbumsForArtist, name=str(i), args=(spotifyId, artistId, albums, intervals, songQue,
+																				songAdditionsQue, recentFilter, i))
+		worker.daemon = True
+		worker.start()
+
+
+	count=0
+	while(count<len(albums)):
+		temp=[]
+		plusTwenty=min(len(albums)-1,count+19)
+		while count<=plusTwenty:
+			temp.append(albums[count])
+			count+=1
+		intervals.put(QueItem(temp))
+
+	intervals.join()
+
+	songs = {}
+	while not songQue.empty():
+		item = songQue.get()
+		songs[item.key] = item.value
+
+	while not songAdditionsQue.empty():
+		item = songAdditionsQue.get()
+		if item.key in songs:
+			song = songs[item.key]
+			song.mergeSpotifyInfo(item.value)
+			songs[item.key] = song
+
+	print "got songs from an album from a specific artist perspective"
+	return songs.values()
 
 
 

@@ -4,14 +4,14 @@ from flask import jsonify
 from flask import abort
 import subprocess
 import sys
-# sys.path.append("/Users/rahulkhanna/tune-in/flaskServer/flaskServer/flaskServer/modules")
+# sys.path.append("/Users/rahulkhanna/Documents/tune-in/flaskServer/flaskServer/flaskServer/modules")
 sys.path.append("/home/dev/web/www/flaskServer/flaskServer/modules")
 import api
 app = Flask(__name__)
 
 @app.route("/")
 def hello():
-	# cmd = ["python","/Users/rahulkhanna/tune-in/flaskServer/flaskServer/flaskServer/test.py"]
+	# cmd = ["python","/Users/rahulkhanna/Documents/tune-in/flaskServer/flaskServer/flaskServer/test.py"]
 	cmd = ["python","/home/dev/web/www/flaskServer/flaskServer/test.py"]
 	p = subprocess.Popen(cmd, stdout = subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE)
 	out,err = p.communicate()

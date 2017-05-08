@@ -5,10 +5,10 @@ from Queue import Queue
 
 class Song:
 
-	def __init__(self,name,artistName,id=None,artistId=None,timeStamp=None,soundCloudInfo=None,spotifyInfo=None):
+	def __init__(self,name,artistNames,id=None,artistId=None,timeStamp=None,soundCloudInfo=None,spotifyInfo=None):
 
 		self.name=name
-		self.artistName=artistName
+		self.artistNames=artistNames
 
 		if id:
 			self._id=id
@@ -42,10 +42,27 @@ class Song:
 	def addSoundCloudKeyValue(self,key,value):
 		self.soundCloudInfo[key]=value
 
+	def getKey(self):
+		key = self.name
+		for artist in self.artistNames:
+			key+=":"
+			key+=artist
+
+		return key
+
+	def __eq__(self, other):
+		if self.getKey() == other.getKey():
+			return True
+		return False
+
+	def mergeSpotifyInfo(self, other):
+		for key in other.spotifyInfo:
+			self.spotifyInfo[key] = other.spotifyInfo[key]
+
 	def getObjectForInsert(self):
 		output={
 			"name":self.name,
-			"artistName":self.artistName,
+			"artistNames":self.artistNames,
 			"artistId":self.artistId,
 			"spotifyInfo":self.spotifyInfo,
 			"soundCloudInfo":self.soundCloudInfo,
@@ -58,7 +75,7 @@ class Song:
 		output={
 			"id":self._id,
 			"name":self.name,
-			"artistName":self.artistName,
+			"artistNames":self.artistNames,
 			"artistId":self.artistId,
 			"spotifyInfo":self.spotifyInfo,
 			"soundCloudInfo":self.soundCloudInfo,
@@ -69,7 +86,7 @@ class Song:
 
 def convertJsonToSong(json):
 
-	song=Song(json['name'],json['artistName'])
+	song=Song(json['name'],json['artistNames'])
 
 	if '_id' in json:
 		song._id=json['_id']
@@ -314,13 +331,33 @@ class SetQueue(Queue):
 
 	def __init__(self, maxsize=0):
 		Queue.__init__(self, maxsize)
-		self.all_items = set()
+		self.all_items = {}
 
-	def _put(self, item):
-		if item not in self.all_items:
-			Queue._put(self, item) 
-			self.all_items.add(item)
-		else:
-			self.unfinished_tasks+=-1
+	def put(self, item):
+		if item.key not in self.all_items:
+			Queue.put(self, item) 
+			self.all_items[item.key] = item.value
+
+	def get(self):
+		item = Queue.get(self)
+		if type(item.value) == int:
+			if item.value == 1:
+				return item.key
+
+		return item
+
+	def checkForKey(self, key):
+		if key in self.all_items:
+			return True
+
+		return False
+	
+
+class QueItem():
+
+	def __init__(self, key, value=1):
+		self.key = key
+		self.value = value
+
 
 
