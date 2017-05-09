@@ -30,3 +30,4 @@ Song:
 	Timestamp
 	Soundcloud Info
 	Spotify Info
+	duration

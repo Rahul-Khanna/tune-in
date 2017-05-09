@@ -5,7 +5,7 @@ from Queue import Queue
 
 class Song:
 
-	def __init__(self,name,artistNames,id=None,artistId=None,timeStamp=None,soundCloudInfo=None,spotifyInfo=None):
+	def __init__(self, name, artistNames, id=None, artistId=None, timeStamp=None, soundCloudInfo=None, spotifyInfo=None, duration=None):
 
 		self.name=name
 		self.artistNames=artistNames
@@ -35,6 +35,12 @@ class Song:
 		else:
 			self.spotifyInfo={}
 
+		if duration:
+			self.duration = duration
+		else:
+			self.duration = -1
+
+
 	# only here because you are manipulating a data structure
 	def addSpotifyKeyValue(self,key,value):
 		self.spotifyInfo[key]=value
@@ -61,25 +67,27 @@ class Song:
 
 	def getObjectForInsert(self):
 		output={
-			"name":self.name,
-			"artistNames":self.artistNames,
-			"artistId":self.artistId,
-			"spotifyInfo":self.spotifyInfo,
-			"soundCloudInfo":self.soundCloudInfo,
-			"timeStamp":self.timeStamp
+			"name" : self.name,
+			"artistNames" : self.artistNames,
+			"artistId" : self.artistId,
+			"spotifyInfo" : self.spotifyInfo,
+			"soundCloudInfo" : self.soundCloudInfo,
+			"timeStamp" : self.timeStamp,
+			"duration" : self.duration
 		}
 
 		return output
 
 	def __repr__(self):
 		output={
-			"id":self._id,
-			"name":self.name,
-			"artistNames":self.artistNames,
-			"artistId":self.artistId,
-			"spotifyInfo":self.spotifyInfo,
-			"soundCloudInfo":self.soundCloudInfo,
-			"timeStamp":self.timeStamp
+			"id" : self._id,
+			"name" : self.name,
+			"artistNames" : self.artistNames,
+			"artistId" : self.artistId,
+			"spotifyInfo" : self.spotifyInfo,
+			"soundCloudInfo" : self.soundCloudInfo,
+			"timeStamp" : self.timeStamp,
+			"duration" : self.duration
 		}
 
 		return str(output)
@@ -89,19 +97,22 @@ def convertJsonToSong(json):
 	song=Song(json['name'],json['artistNames'])
 
 	if '_id' in json:
-		song._id=json['_id']
+		song._id = json['_id']
 
 	if 'artistId' in json:
-		song.artistId=json['artistsId']
+		song.artistId = json['artistsId']
 
 	if 'spotifyInfo' in json:
-		song.spotifyInfo=json['spotifyInfo']
+		song.spotifyInfo = json['spotifyInfo']
 
 	if 'soundCloudInfo' in json:
-		song.soundCloudInfo=json['soundCloudInfo']
+		song.soundCloudInfo = json['soundCloudInfo']
 
 	if 'timeStamp' in json:
-		song.timeStamp=json['timeStamp']
+		song.timeStamp = json['timeStamp']
+
+	if 'duration' in json:
+		song.duration = json['duration']
 
 	return song
 

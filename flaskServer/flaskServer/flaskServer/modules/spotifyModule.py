@@ -106,7 +106,8 @@ def _getSongsFromAlbumsForArtist(spotifyId, artistId, albums, intervals, songs, 
 					if relevant:
 						songName=track['name']
 						song = Song(songName,artistNames)
-						song.artistId=artistId
+						song.artistId = artistId
+						song.duration = track["duration_ms"]
 
 						for key in track['available_markets']:
 							value={}
